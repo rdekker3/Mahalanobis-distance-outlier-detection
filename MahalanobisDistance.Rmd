@@ -1,0 +1,734 @@
+---
+title: "Malahanobis Distance"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+These vowel data used an automatic vowel formant extraction tool, which allows for large data sets. However, errors will always be present in a data set this large (over 173,000 vowel tokens), so outlier detection needs to be applied at the vowel levels. Because the vowels are in a scatter plot (F1 is the y-axis and F2 is the x-axis), Mahalanobois distance is applied to best track vowel vowel points stray from the ellipsis for where 95% of tokens are found. This allows the retention of 95% of data, and removes 5% of the data which are likely just noise due to classification errors by the automated formant extraction tool. The entires for different vowels are numerous because it accounts for all phonetic envirnments based in the following phonological segment. 
+```
+```
+
+data <- read_excel("Desktop/diss/working/data/data.xlsx") 
+
+AllMeans <- data %>%
+  group_by(Vowel) %>%
+  summarise(mean_F1 = mean(F1),
+            mean_F2 = mean(F2)) %>%
+  print(n = 11)
+
+ggplot(data, aes(x = F2, y = F1, color = Vowel, label = Vowel)) + 
+  geom_point() + 
+  geom_label(data = AllMeans, aes(x = mean_F2, y = mean_F1)) +
+  scale_x_reverse() + scale_y_reverse() + 
+  theme_classic()
+
+data <- read_excel("Desktop/diss/working/data/dataTreated.xlsx")
+  
+dataviz <- filter(data, !Vowel == "ER" , !Vowel == "AY", !Vowel == "AW", !Vowel == "OY")#remove the diphthongs from the data set
+
+
+AllMeans <- dataviz %>%
+  group_by(Vowel) %>%
+  summarise(mean_F1 = mean(F1),
+            mean_F2 = mean(F2)) %>%
+  print(n = 11)
+
+ggplot(dataviz, aes(x = F2, y = F1, color = Vowel, label = Vowel)) + 
+  geom_point() + 
+  geom_label(data = AllMeans, aes(x = mean_F2, y = mean_F1)) +
+  scale_x_reverse() + scale_y_reverse() + 
+  theme_classic()
+
+##### IY MD use the first vowel "IY" (as in 'beet'). 
+IY <- filter(data, Vowel == "IY", !fol_seg == "B" , !fol_seg == "D", !fol_seg == "G", !fol_seg == "P", !fol_seg == "T", !fol_seg == "K", !fol_seg == "V", !fol_seg == "F", !fol_seg == "ZH", !fol_seg == "SH", !fol_seg == "S", !fol_seg == "Z", !fol_seg == "CH" , !fol_seg == "JH")
+IY <- filter(data, Vowel == "IY")
+IYsp <- IY[c("F1","F2")]
+IYcenter <- colMeans(IYsp)
+IY.cov <- cov(IYsp)
+distances <- mahalanobis(x = IYsp, center = IYcenter, cov = IY.cov)
+distances <- as.data.frame(distances)
+cutoff <- qchisq(p = 0.95 , df = ncol(IYsp))
+IY <- c(IY,distances)
+IY <- as.data.frame(IY)
+IY <-filter(IY, !distances > 6)
+write.csv(IY,"Desktop/IYmd.csv", row.names = FALSE) 
+
+##### IH MD, 2
+IH <- filter(data, Vowel == "IH", !plt_manner == "nasal")
+IHsp <- IH[c("F1","F2")]
+IHcenter <- colMeans(IHsp)
+IH.cov <- cov(IHsp)
+distances <- mahalanobis(x = IHsp, center = IHcenter, cov = IH.cov)
+distances <- as.data.frame(distances)
+IH <- c(IH,distances)
+IH <- as.data.frame(IH)
+IH <-filter(IH, !distances > 6)
+write.csv(IH,"Desktop/2IHmd.csv", row.names = FALSE)
+
+##### IH MD, 3
+IH <- filter(data, Vowel == "IH", plt_manner == "nasal")
+IHsp <- IH[c("F1","F2")]
+IHcenter <- colMeans(IHsp)
+IH.cov <- cov(IHsp)
+distances <- mahalanobis(x = IHsp, center = IHcenter, cov = IH.cov)
+distances <- as.data.frame(distances)
+IH <- c(IH,distances)
+IH <- as.data.frame(IH)
+IH <-filter(IH, !distances > 6)
+write.csv(IH,"Desktop/3IHmd.csv", row.names = FALSE)
+
+##### EH MD, 4
+EH <- filter(data, Vowel == "EH", !plt_manner == "nasal")
+EHsp <- EH[c("F1","F2")]
+EHcenter <- colMeans(EHsp)
+EH.cov <- cov(EHsp)
+distances <- mahalanobis(x = EHsp, center = EHcenter, cov = EH.cov)
+distances <- as.data.frame(distances)
+EH <- c(EH,distances)
+EH <- as.data.frame(EH)
+EH <-filter(EH, !distances > 6)
+write.csv(EH,"Desktop/4EHmd.csv", row.names = FALSE)
+
+##### EH MD, 5
+EH <- filter(data, Vowel == "EH", plt_manner == "nasal")
+EHsp <- EH[c("F1","F2")]
+EHcenter <- colMeans(EHsp)
+EH.cov <- cov(EHsp)
+distances <- mahalanobis(x = EHsp, center = EHcenter, cov = EH.cov)
+distances <- as.data.frame(distances)
+EH <- c(EH,distances)
+EH <- as.data.frame(EH)
+EH <-filter(EH, !distances > 6)
+write.csv(EH,"Desktop/5EHmd.csv", row.names = FALSE)
+
+##### AE MD, 6
+AE <- filter(data, Vowel == "AE", !plt_manner == "nasal", !fol_seg == "B" , !fol_seg == "D", !fol_seg == "G", !fol_seg == "P", !fol_seg == "T", !fol_seg == "K", !fol_seg == "V", !fol_seg == "F", !fol_seg == "ZH", !fol_seg == "SH", !fol_seg == "S", !fol_seg == "Z", !fol_seg == "CH" , !fol_seg == "JH")
+AEsp <- AE[c("F1","F2")]
+AEcenter <- colMeans(AEsp)
+AE.cov <- cov(AEsp)
+distances <- mahalanobis(x = AEsp, center = AEcenter, cov = AE.cov)
+distances <- as.data.frame(distances)
+AE <- c(AE,distances)
+AE <- as.data.frame(AE)
+AE <-filter(AE, !distances > 6)
+write.csv(AE,"Desktop/6AEmd.csv", row.names = FALSE)
+
+##### AE MD, 7
+AE <- filter(data, Vowel == "AE", plt_manner == "nasal")
+AEsp <- AE[c("F1","F2")]
+AEcenter <- colMeans(AEsp)
+AE.cov <- cov(AEsp)
+distances <- mahalanobis(x = AEsp, center = AEcenter, cov = AE.cov)
+distances <- as.data.frame(distances)
+AE <- c(AE,distances)
+AE <- as.data.frame(AE)
+AE <-filter(AE, !distances > 6)
+write.csv(AE,"Desktop/7AEmd.csv", row.names = FALSE)
+
+##### AE MD, 8
+AE <- filter(data, Vowel == "AE", fol_seg == "G")
+AEsp <- AE[c("F1","F2")]
+AEcenter <- colMeans(AEsp)
+AE.cov <- cov(AEsp)
+distances <- mahalanobis(x = AEsp, center = AEcenter, cov = AE.cov)
+distances <- as.data.frame(distances)
+AE <- c(AE,distances)
+AE <- as.data.frame(AE)
+AE <-filter(AE, !distances > 6)
+write.csv(AE,"Desktop/8AEmd.csv", row.names = FALSE)
+
+###### AH MD, 9
+AH <- filter(data, Vowel == "AH")
+AHsp <- AH[c("F1","F2")]
+AHcenter <- colMeans(AHsp)
+AH.cov <- cov(AHsp)
+distances <- mahalanobis(x = AHsp, center = AHcenter, cov = AH.cov)
+distances <- as.data.frame(distances)
+cutoff <- qchisq(p = 0.95 , df = ncol(AHsp))
+AH <- c(AH,distances)
+AH <- as.data.frame(AH)
+AH <-filter(AH, !distances > 6)
+write.csv(AH,"Desktop/9AHmd.csv", row.names = FALSE)
+
+##### AA MD, 10
+AA <- filter(data, Vowel == "AA", !fol_seg == "B" , !fol_seg == "D", !fol_seg == "G", !fol_seg == "P", !fol_seg == "T", !fol_seg == "K", !fol_seg == "V", !fol_seg == "F", !fol_seg == "ZH", !fol_seg == "SH", !fol_seg == "S", !fol_seg == "Z", !fol_seg == "CH" , !fol_seg == "JH")
+AAsp <- AA[c("F1","F2")]
+AAcenter <- colMeans(AAsp)
+AA.cov <- cov(AAsp)
+distances <- mahalanobis(x = AAsp, center = AAcenter, cov = AA.cov)
+distances <- as.data.frame(distances)
+AA <- c(AA,distances)
+AA <- as.data.frame(AA)
+AA <-filter(AA, !distances > 6)
+write.csv(AA,"Desktop/10AAmd.csv", row.names = FALSE)
+
+##### AA md, 11
+
+AA <- filter(data, Vowel == "AA", fol_seg == "B" | fol_seg == "D"| fol_seg == "G"| fol_seg == "P"| fol_seg == "T"| fol_seg == "K"| fol_seg == "V"| fol_seg == "F"| fol_seg == "ZH"| fol_seg == "SH"| fol_seg == "S"| fol_seg == "Z"| fol_seg == "CH" | fol_seg == "JH")
+AAsp <- AA[c("F1","F2")]
+AAcenter <- colMeans(AAsp)
+AA.cov <- cov(AAsp)
+distances <- mahalanobis(x = AAsp, center = AAcenter, cov = AA.cov)
+distances <- as.data.frame(distances)
+AA <- c(AA, distances)
+AA <- as.data.frame(AA)
+AA <-filter(AA, !distances > 6)
+write.csv(AA,"Desktop/11AAmd.csv", row.names = FALSE)
+
+##### AO MD, 12
+AO <- filter(data, Vowel == "AO", !fol_seg == "B" , !fol_seg == "D", !fol_seg == "G", !fol_seg == "P", !fol_seg == "T", !fol_seg == "K", !fol_seg == "V", !fol_seg == "F", !fol_seg == "ZH", !fol_seg == "SH", !fol_seg == "S", !fol_seg == "Z", !fol_seg == "CH" , !fol_seg == "JH", !fol_seg == "R" )
+AOsp <- AO[c("F1","F2")]
+AOcenter <- colMeans(AOsp)
+AO.cov <- cov(AOsp)
+distances <- mahalanobis(x = AOsp, center = AOcenter, cov = AO.cov)
+distances <- as.data.frame(distances)
+AO <- c(AO,distances)
+AO <- as.data.frame(AO)
+AO <-filter(AO, !distances > 6)
+write.csv(AO,"Desktop/12AOmd.csv", row.names = FALSE)
+
+##### AO md, 13
+
+AO <- filter(data, Vowel == "AO", fol_seg == "B" | fol_seg == "D"| fol_seg == "G"| fol_seg == "P"| fol_seg == "T"| fol_seg == "K"| fol_seg == "V"| fol_seg == "F"| fol_seg == "ZH"| fol_seg == "SH"| fol_seg == "S"| fol_seg == "Z"| fol_seg == "CH" | fol_seg == "JH")
+AOsp <- AO[c("F1","F2")]
+AOcenter <- colMeans(AOsp)
+AO.cov <- cov(AOsp)
+distances <- mahalanobis(x = AOsp, center = AOcenter, cov = AO.cov)
+distances <- as.data.frame(distances)
+AO <- c(AO, distances)
+AO <- as.data.frame(AO)
+AO <-filter(AO, !distances > 6)
+write.csv(AO,"Desktop/AOmd.csv", row.names = FALSE)
+
+##### ER MD, 14
+ER <- filter(data, Vowel == "ER")
+ERsp <- ER[c("F1","F2")]
+ERcenter <- colMeans(ERsp)
+ER.cov <- cov(ERsp)
+distances <- mahalanobis(x = ERsp, center = ERcenter, cov = ER.cov)
+distances <- as.data.frame(distances)
+ER <- c(ER,distances)
+ER <- as.data.frame(ER)
+ER <-filter(ER, !distances > 6)
+write.csv(ER,"Desktop/14ERmd.csv", row.names = FALSE)
+
+####### UW md, 15
+
+UW <- filter(data, Vowel == "UW", !fol_seg == "L")
+UWsp <- UW[c("F1","F2")]
+UWcenter <- colMeans(UWsp)
+UW.cov <- cov(UWsp)
+distances <- mahalanobis(x = UWsp, center = UWcenter, cov = UW.cov)
+distances <- as.data.frame(distances)
+UW <- c(UW,distances)
+UW <- as.data.frame(UW)
+UW <-filter(UW, !distances > 6)
+write.csv(UW,"Desktop/UWmd.csv", row.names = FALSE)
+
+####### UWL md, 16
+
+UW <- filter(data, Vowel == "UW", fol_seg == "L")
+UWsp <- UW[c("F1","F2")]
+UWcenter <- colMeans(UWsp)
+UW.cov <- cov(UWsp)
+distances <- mahalanobis(x = UWsp, center = UWcenter, cov = UW.cov)
+distances <- as.data.frame(distances)
+UW <- c(UW,distances)
+UW <- as.data.frame(UW)
+UW <-filter(UW, !distances > 6)
+write.csv(UW,"Desktop/UWLmd.csv", row.names = FALSE)
+
+##### OW md, 17
+
+
+OW <- filter(data, Vowel == "OW", !fol_seg == "B" , !fol_seg == "D", !fol_seg == "G", !fol_seg == "P", !fol_seg == "T", !fol_seg == "K", !fol_seg == "V", !fol_seg == "F", !fol_seg == "ZH", !fol_seg == "SH", !fol_seg == "S", !fol_seg == "Z", !fol_seg == "CH" , !fol_seg == "JH")
+OWsp <- OW[c("F1","F2")]
+OWcenter <- colMeans(OWsp)
+OW.cov <- cov(OWsp)
+distances <- mahalanobis(x = OWsp, center = OWcenter, cov = OW.cov)
+distances <- as.data.frame(distances)
+OW <- c(OW,distances)
+OW <- as.data.frame(OW)
+OW <-filter(OW, !distances > 6)
+write.csv(OW,"Desktop/17OWmd.csv", row.names = FALSE)
+
+##### OW md, 18
+
+OW <- filter(data, Vowel == "OW", fol_seg == "B" | fol_seg == "D"| fol_seg == "G"| fol_seg == "P"| fol_seg == "T"| fol_seg == "K"| fol_seg == "V"| fol_seg == "F"| fol_seg == "ZH"| fol_seg == "SH"| fol_seg == "S"| fol_seg == "Z"| fol_seg == "CH" | fol_seg == "JH")
+OWsp <- OW[c("F1","F2")]
+OWcenter <- colMeans(OWsp)
+OW.cov <- cov(OWsp)
+distances <- mahalanobis(x = OWsp, center = OWcenter, cov = OW.cov)
+distances <- as.data.frame(distances)
+OW <- c(OW, distances)
+OW <- as.data.frame(OW)
+OW <-filter(OW, !distances > 6)
+write.csv(OW,"Desktop/18OWmd.csv", row.names = FALSE)
+
+
+##### UH MD, 19 
+UH <- filter(data, Vowel == "UH")
+UHsp <- UH[c("F1","F2")]
+UHcenter <- colMeans(UHsp)
+UH.cov <- cov(UHsp)
+distances <- mahalanobis(x = UHsp, center = UHcenter, cov = UH.cov)
+distances <- as.data.frame(distances)
+UH <- c(UH,distances)
+UH <- as.data.frame(UH)
+UH <-filter(UH, !distances > 6)
+write.csv(UH,"Desktop/19UHmd.csv", row.names = FALSE)
+
+##### AW md, 20
+
+AW <- filter(data, Vowel == "AW", !fol_seg == "B" , !fol_seg == "D", !fol_seg == "G", !fol_seg == "P", !fol_seg == "T", !fol_seg == "K", !fol_seg == "V", !fol_seg == "F", !fol_seg == "ZH", !fol_seg == "SH", !fol_seg == "S", !fol_seg == "Z", !fol_seg == "CH" , !fol_seg == "JH")
+AWsp <- AW[c("F1","F2")]
+AWcenter <- colMeans(AWsp)
+AW.cov <- cov(AWsp)
+distances <- mahalanobis(x = AWsp, center = AWcenter, cov = AW.cov)
+distances <- as.data.frame(distances)
+AW <- c(AW,distances)
+AW <- as.data.frame(AW)
+AW <-filter(AW, !distances > 6)
+write.csv(AW,"Desktop/20AWmd.csv", row.names = FALSE)
+
+##### AW md, 21
+
+AW <- filter(data, Vowel == "AW", fol_seg == "B" | fol_seg == "D"| fol_seg == "G"| fol_seg == "P"| fol_seg == "T"| fol_seg == "K"| fol_seg == "V"| fol_seg == "F"| fol_seg == "ZH"| fol_seg == "SH"| fol_seg == "S"| fol_seg == "Z"| fol_seg == "CH" | fol_seg == "JH")
+AWsp <- AW[c("F1","F2")]
+AWcenter <- colMeans(AWsp)
+AW.cov <- cov(AWsp)
+distances <- mahalanobis(x = AWsp, center = AWcenter, cov = AW.cov)
+distances <- as.data.frame(distances)
+AW <- c(AW, distances)
+AW <- as.data.frame(AW)
+AW <-filter(AW, !distances > 6)
+write.csv(AW,"Desktop/21AWmd.csv", row.names = FALSE)
+
+##### OY md, 22
+
+OY <- filter(data, Vowel == "OY", !fol_seg == "B" , !fol_seg == "D", !fol_seg == "G", !fol_seg == "P", !fol_seg == "T", !fol_seg == "K", !fol_seg == "V", !fol_seg == "F", !fol_seg == "ZH", !fol_seg == "SH", !fol_seg == "S", !fol_seg == "Z", !fol_seg == "CH" , !fol_seg == "JH")
+OYsp <- OY[c("F1","F2")]
+OYcenter <- colMeans(OYsp)
+OY.cov <- cov(OYsp)
+distances <- mahalanobis(x = OYsp, center = OYcenter, cov = OY.cov)
+distances <- as.data.frame(distances)
+OY <- c(OY,distances)
+OY <- as.data.frame(OY)
+OY <-filter(OY, !distances > 6)
+write.csv(OY,"Desktop/22OYmd.csv", row.names = FALSE)
+
+##### OY md, 23
+
+OY <- filter(data, Vowel == "OY", fol_seg == "B" | fol_seg == "D"| fol_seg == "G"| fol_seg == "P"| fol_seg == "T"| fol_seg == "K"| fol_seg == "V"| fol_seg == "F"| fol_seg == "ZH"| fol_seg == "SH"| fol_seg == "S"| fol_seg == "Z"| fol_seg == "CH" | fol_seg == "JH")
+OYsp <- OY[c("F1","F2")]
+OYcenter <- colMeans(OYsp)
+OY.cov <- cov(OYsp)
+distances <- mahalanobis(x = OYsp, center = OYcenter, cov = OY.cov)
+distances <- as.data.frame(distances)
+OY <- c(OY, distances)
+OY <- as.data.frame(OY)
+OY <-filter(OY, !distances > 6)
+write.csv(OY,"Desktop/13OYmd.csv", row.names = FALSE)
+
+
+##### AI md, 24
+
+AI <- filter(data, Vowel == "AI", !fol_seg == "B" , !fol_seg == "D", !fol_seg == "G", !fol_seg == "P", !fol_seg == "T", !fol_seg == "K", !fol_seg == "V", !fol_seg == "F", !fol_seg == "ZH", !fol_seg == "SH", !fol_seg == "S", !fol_seg == "Z", !fol_seg == "CH" , !fol_seg == "JH")
+AIsp <- AI[c("F1","F2")]
+AIcenter <- colMeans(AIsp)
+AI.cov <- cov(AIsp)
+distances <- mahalanobis(x = AIsp, center = AIcenter, cov = AI.cov)
+distances <- as.data.frame(distances)
+AI <- c(AI,distances)
+AI <- as.data.frame(AI)
+AI <-filter(AI, !distances > 6)
+write.csv(AI,"Desktop/24AImd.csv", row.names = FALSE)
+
+##### AY md, 24
+
+AY <- filter(data, Vowel == "AY", !fol_seg == "B" , !fol_seg == "D", !fol_seg == "G", !fol_seg == "P", !fol_seg == "T", !fol_seg == "K", !fol_seg == "V", !fol_seg == "F", !fol_seg == "ZH", !fol_seg == "SH", !fol_seg == "S", !fol_seg == "Z", !fol_seg == "CH" , !fol_seg == "JH")
+AYsp <- AY[c("F1","F2")]
+AYcenter <- colMeans(AYsp)
+AY.cov <- cov(AYsp)
+distances <- mahalanobis(x = AYsp, center = AYcenter, cov = AY.cov)
+distances <- as.data.frame(distances)
+AY <- c(AY,distances)
+AY <- as.data.frame(AY)
+AY <-filter(AY, !distances > 6)
+write.csv(AY,"Desktop/24AYmd.csv", row.names = FALSE)
+
+##### AY md, 25
+
+AY <- filter(data, Vowel == "AY", fol_seg == "B" | fol_seg == "D"| fol_seg == "G"| fol_seg == "P"| fol_seg == "T"| fol_seg == "K"| fol_seg == "V"| fol_seg == "F"| fol_seg == "ZH"| fol_seg == "SH"| fol_seg == "S"| fol_seg == "Z"| fol_seg == "CH" | fol_seg == "JH")
+AYsp <- AY[c("F1","F2")]
+AYcenter <- colMeans(AYsp)
+AY.cov <- cov(AYsp)
+distances <- mahalanobis(x = AYsp, center = AYcenter, cov = AY.cov)
+distances <- as.data.frame(distances)
+AY <- c(AY, distances)
+AY <- as.data.frame(AY)
+AY <-filter(AY, !distances > 6)
+write.csv(AY,"Desktop/25AYmd.csv", row.names = FALSE)
+
+
+##### EY md, 27
+
+EY <- filter(data, Vowel == "EY", fol_seg == "B" | fol_seg == "D"| fol_seg == "G"| fol_seg == "P"| fol_seg == "T"| fol_seg == "K"| fol_seg == "V"| fol_seg == "F"| fol_seg == "ZH"| fol_seg == "SH"| fol_seg == "S"| fol_seg == "Z"| fol_seg == "CH" | fol_seg == "JH")
+EYsp <- EY[c("F1","F2")]
+EYcenter <- colMeans(EYsp)
+EY.cov <- cov(EYsp)
+distances <- mahalanobis(x = EYsp, center = EYcenter, cov = EY.cov)
+distances <- as.data.frame(distances)
+EY <- c(EY, distances)
+EY <- as.data.frame(EY)
+EY <-filter(EY, !distances > 6)
+write.csv(EY,"Desktop/27EYmd.csv", row.names = FALSE)
+
+##### IY md, 28
+
+IY <- filter(data, Vowel == "IY", fol_seg == "B" | fol_seg == "D"| fol_seg == "G"| fol_seg == "P"| fol_seg == "T"| fol_seg == "K"| fol_seg == "V"| fol_seg == "F"| fol_seg == "ZH"| fol_seg == "SH"| fol_seg == "S"| fol_seg == "Z"| fol_seg == "CH" | fol_seg == "JH")
+IYsp <- IY[c("F1","F2")]
+IYcenter <- colMeans(IYsp)
+IY.cov <- cov(IYsp)
+distances <- mahalanobis(x = IYsp, center = IYcenter, cov = IY.cov)
+distances <- as.data.frame(distances)
+IY <- c(IY, distances)
+IY <- as.data.frame(IY)
+IY <-filter(IY, !distances > 6)
+write.csv(IY,"Desktop/28IYmd.csv", row.names = FALSE)
+
+##### AO MD, 29
+AO <- filter(data, Vowel == "AO", fol_seg == "R")
+AOsp <- AO[c("F1","F2")]
+AOcenter <- colMeans(AOsp)
+AO.cov <- cov(AOsp)
+distances <- mahalanobis(x = AOsp, center = AOcenter, cov = AO.cov)
+distances <- as.data.frame(distances)
+AO <- c(AO,distances)
+AO <- as.data.frame(AO)
+AO <-filter(AO, !distances > 6)
+write.csv(AO,"Desktop/29AOmd.csv", row.names = FALSE)
+
+AE <- filter(data, Vowel == "AE", !plt_manner == "nasal", !fol_seg == "L" , !fol_seg == "G")
+AEsp <- AE[c("F1","F2")]
+AEcenter <- colMeans(AEsp)
+AE.cov <- cov(AEsp)
+distances <- mahalanobis(x = AEsp, center = AEcenter, cov = AE.cov)
+distances <- as.data.frame(distances)
+AE <- c(AE,distances)
+AE <- as.data.frame(AE)
+AE <-filter(AE, !distances > 6)
+write.csv(AE,"Desktop/AEmd.csv", row.names = FALSE)
+
+
+#### Shreveport
+
+AdriaG <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("AdriaG"))
+write.csv(AdriaG, "Desktop/AdriaG.csv")
+
+DomoniqueB <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("DomoniqueB"))
+write.csv(DomoniqueB, "Desktop/DomoniqueB.csv")
+
+DougW <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("DougW"))
+write.csv(DougW, "Desktop/DougW.csv")
+
+KneleyH <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("KneleyH"))
+write.csv(KneleyH, "Desktop/KneleyH.csv")
+
+JeffC <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("JeffC"))
+write.csv(JeffC, "Desktop/JeffC.csv")
+
+JessicaM <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("JessicaM"))
+write.csv(JessicaM, "Desktop/JessicaM.csv")
+
+RashadJ <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("RashadJ"))
+write.csv(RashadJ, "Desktop/RashadJ.csv")
+
+ChandlerW <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("ChandlerW"))
+write.csv(ChandlerW, "Desktop/ChandlerW.csv")
+
+ChristianP <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("ChristianP"))
+write.csv(ChristianP, "Desktop/ChristianP.csv")
+
+JeffF <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("JeffF"))
+write.csv(JeffF, "Desktop/JeffF.csv")
+
+###### Lexington
+
+
+AmbperP <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("AmberP"))
+write.csv(AmbperP, "Desktop/AmbperPn.csv")
+
+BillB <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("BillB"))
+write.csv(BillB, "Desktop/BillBn.csv")
+
+KristenK <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("KristenK"))
+write.csv(KristenK, "Desktop/KristenKn.csv")
+
+SamD <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("SamD"))
+write.csv(SamD, "Desktop/SamDn.csv")
+
+ChrisB <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("ChrisB"))
+write.csv(ChrisB, "Desktop/ChrisBn.csv")
+
+JimC <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("JimC"))
+write.csv(JimC, "Desktop/JimCn.csv")
+
+BrianM <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("BrianM"))
+write.csv(BrianM, "Desktop/BrianMn.csv")
+
+ShelbyS <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("ShelbyS"))
+write.csv(ShelbyS, "Desktop/ShelbySn.csv")
+
+PhilP <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("PhilP"))
+write.csv(PhilP, "Desktop/PhilPn.csv")
+
+VictorP <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("VictorP"))
+write.csv(VictorP, "Desktop/VictorPn.csv")
+
+##### Tallahasee
+
+ArtM <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("ArtM"))
+write.csv(ArtM, "Desktop/ArtMn.csv")
+
+BenK <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("BenK"))
+write.csv(BenK, "Desktop/BenKn.csv")
+
+JulieM <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("JulieM"))
+write.csv(JulieM, "Desktop/JulieMn.csv")
+
+LanetraB <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("LanetraB"))
+write.csv(LanetraB, "Desktop/LanetraBn.csv")
+
+MikeM <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("MikeM"))
+write.csv(MikeM, "Desktop/MikeMn.csv")
+
+RobN <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("RobN"))
+write.csv(RobN, "Desktop/RobNn.csv")
+
+RyanK <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("RyanK"))
+write.csv(RyanK, "Desktop/RyanKn.csv")
+
+AmberS <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("AmberS"))
+write.csv(AmberS, "Desktop/AmberSn.csv")
+
+BrandonS <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("BrandonS"))
+write.csv(BrandonS, "Desktop/BrandonSn.csv")
+
+MonicaC <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("MonicaC"))
+write.csv(MonicaC, "Desktop/MonicaCn.csv")
+
+###### Meridian 
+
+EmilyE <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("EmilyE"))
+write.csv(EmilyE, "Desktop/EmilyEn.csv")
+
+InsitarF <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("InsitarF"))
+write.csv(InsitarF, "Desktop/InsitarFn.csv")
+
+LindseyH <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("LindseyH"))
+write.csv(LindseyH, "Desktop/LindseyHn.csv")
+
+TomW <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("TomW"))
+write.csv(TomW, "Desktop/TomWn.csv")
+
+ShelbyM <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("ShelbyM"))
+write.csv(ShelbyM, "Desktop/ShelbyMn.csv")
+
+StephenB <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("StephenB"))
+write.csv(StephenB, "Desktop/StephenBn.csv")
+
+TravisP <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("TravisP"))
+write.csv(TravisP, "Desktop/TravisPn.csv")
+
+BriannaB <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("BriannaB"))
+write.csv(BriannaB, "Desktop/BriannaBn.csv")
+
+JanaeH <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("JanaeH"))
+write.csv(JanaeH, "Desktop/JanaeHn.csv")
+
+NicholasB <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("NicholasB"))
+write.csv(NicholasB, "Desktop/NicholasBn.csv")
+
+##### Greenville 
+
+CarolC <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("CarolC"))
+write.csv(CarolC, "Desktop/CarolCn.csv")
+
+JaneR <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("JaneR"))
+write.csv(JaneR, "Desktop/JaneRn.csv")
+
+MichaelC <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("MichaelC"))
+write.csv(MichaelC, "Desktop/MichaelCn.csv")
+
+NigelR <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("NigelR"))
+write.csv(NigelR, "Desktop/NigelRn.csv")
+
+ChrisJ <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("ChrisJ"))
+write.csv(ChrisJ, "Desktop/ChrisJn.csv")
+
+DaleG <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("DaleG"))
+write.csv(DaleG, "Desktop/DaleGn.csv")
+
+MarcW <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("MarcW"))
+write.csv(MarcW, "Desktop/MarcWn.csv")
+
+KylieJ <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("KylieJ"))
+write.csv(KylieJ, "Desktop/KylieJn.csv")
+
+NolanB <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("NolanB"))
+write.csv(NolanB, "Desktop/NolanBn.csv")
+
+TaggartH <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("TaggartH"))
+write.csv(TaggartH, "Desktop/TaggartHn.csv")
+
+###### Charleston
+
+DaveB <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("DaveB"))
+write.csv(DaveB, "Desktop/DaveBn.csv")
+
+JenniferM <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("JenniferM"))
+write.csv(JenniferM, "Desktop/JenniferMn.csv")
+
+KallieC <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("KallieC"))
+write.csv(KallieC, "Desktop/KallieCn.csv")
+
+RickL <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("RickL"))
+write.csv(RickL, "Desktop/RickLn.csv")
+
+BrandonS <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("BrandonS"))
+write.csv(BrandonS, "Desktop/BrandonSn.csv")
+
+DougH <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("DougH"))
+write.csv(DougH, "Desktop/DougHn.csv")
+
+MarkM <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("MarkM"))
+write.csv(MarkM, "Desktop/MarkMn.csv")
+
+AnnaS <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("AnnaS"))
+write.csv(AnnaS, "Desktop/AnnaSn.csv")
+
+AvaR <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("AvaR"))
+write.csv(AvaR, "Desktop/AvaRn.csv")
+
+DanielleD <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("DanielleD"))
+write.csv(DanielleD, "Desktop/DanielleDn.csv")
+
+##### Waco
+
+JulieH <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("JulieH"))
+write.csv(JulieH, "Desktop/JulieHn.csv")
+
+KeshaL <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("KeshaL"))
+write.csv(KeshaL, "Desktop/KeshaLn.csv")
+
+LaurenW <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("LaurenW"))
+write.csv(LaurenW, "Desktop/LaurenWn.csv")
+
+PeteS <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("PeteS"))
+write.csv(PeteS, "Desktop/PeteSn.csv")
+
+BradyT <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("BradyT"))
+write.csv(BradyT, "Desktop/BradyTn.csv")
+
+SeanB <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("SeanB"))
+write.csv(SeanB, "Desktop/SeanBn.csv")
+
+DarbyB <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("DarbyB"))
+write.csv(DarbyB, "Desktop/DarbyBn.csv")
+
+AlexG <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("AlexG"))
+write.csv(AlexG, "Desktop/AlexGn.csv")
+
+HannahH <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("HannahH"))
+write.csv(HannahH, "Desktop/HannahHn.csv")
+
+MeganV <- read_excel("Desktop/diss/working/data/dataTreated.xlsx") %>%
+  filter(Speaker %in% c("MeganV"))
+write.csv(MeganV, "Desktop/MeganVn.csv")
+
+AY <- read_excel("Desktop/premahay.xlsx")
+AYsp <- AY[c("F1","F2")]
+AYcenter <- colMeans(AYsp)
+AY.cov <- cov(AYsp)
+distances <- mahalanobis(x = AYsp, center = AYcenter, cov = AY.cov)
+distances <- as.data.frame(distances)
+AY <- c(AY, distances)
+AY <- as.data.frame(AY)
+AY <-filter(AY, !distances > 6)
+write.csv(AY,"Desktop/25AYmd.csv", row.names = FALSE)
+
